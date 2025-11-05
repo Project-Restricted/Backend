@@ -63,8 +63,9 @@ GET /api/v1/movies/?search=inception&page=1
 ### 📤 Пример запроса
 ```http
 GET /api/v1/movies/42/
-
+```
 ### 📤 Пример ответа
+```
 {
   "id": 42,
   "title": "Inception",
@@ -84,3 +85,4 @@ GET /api/v1/movies/42/
     {"platform": "RuTube", "url": "https://rutube.com/inception"}
   ]
 }
+```
