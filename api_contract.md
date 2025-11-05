@@ -20,8 +20,10 @@
 ### 📤 Пример запроса
 ```http
 GET /api/v1/movies/?search=inception&page=1
+```
 
 ### 📤 Пример ответа
+```
 {
   "count": 245,
   "next": "https://api.cinemaportal.com/api/v1/movies/?page=2",
@@ -47,7 +49,7 @@ GET /api/v1/movies/?search=inception&page=1
     }
   ]
 }
-
+```
 
 ## 🔹 GET /api/v1/movies/{id}/`
 
