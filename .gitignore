@@ -1,0 +1,19 @@
+# .gitignore
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Virtual environment
+venv/
+.env/
+.env.bak/
+
+# IDE
+.vscode/
+.idea/
+
+# Django specific
+/static/
+media/
