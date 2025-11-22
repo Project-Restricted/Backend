@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: cinemaportal-backend
+    env: python
+    plan: free
+    region: frankfurt
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn cinemaportal.wsgi:application --bind 0.0.0.0:$PORT"
+
+databases:
+  - name: cinemaportal-db
+    plan: free

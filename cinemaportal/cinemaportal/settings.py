@@ -164,3 +164,11 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+import os
+
+if os.environ.get('RENDER'):
+    DEBUG = False
+    ALLOWED_HOSTS = ['*']
+
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
