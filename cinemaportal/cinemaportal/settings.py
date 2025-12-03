@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -62,6 +63,8 @@ INSTALLED_APPS = [
       # Third party apps
     'rest_framework',
     "corsheaders",
+        'djoser',
+        'rest_framework_simplejwt.token_blacklist',
     
     # Local apps
     'users',
@@ -78,8 +81,38 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 20,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
 }
+
+# Simple JWT configuration (access/refresh token lifetimes and rotation)
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Djoser configuration (basic). Customize SERIALIZERS to override user create/representation.
+DJOSER = {
+    'LOGIN_FIELD': 'username',
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    'SEND_ACTIVATION_EMAIL': False,
+}
+
+# Development email backend: prints emails to the console (activation/reset links visible in terminal)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Cookie settings for optional refresh-token cookie flow
+# Name of the cookie used to store refresh token when using cookie-based flow
+SIMPLE_JWT_REFRESH_COOKIE = 'refresh'
+# Cookie security options (in development keep False; set True in production)
+SIMPLE_JWT_REFRESH_COOKIE_SECURE = False
+SIMPLE_JWT_REFRESH_COOKIE_SAMESITE = 'Lax'
+SIMPLE_JWT_REFRESH_COOKIE_HTTPONLY = True
 
 MIDDLEWARE = [
     "core.middleware.CustomCorsMiddleware",  # ← ДОБАВИТЬ
@@ -116,8 +149,12 @@ WSGI_APPLICATION = 'cinemaportal.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cinemaportal',
+        'USER': 'cinema_user',
+        'PASSWORD': 'localpass123',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
