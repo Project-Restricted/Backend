@@ -11,3 +11,14 @@ class InfiniteScrollPagination(PageNumberPagination):
             "films": data,
             "hasMore": self.page.has_next()
         })
+
+
+class ReviewsPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+
+    def get_paginated_response(self, data):
+        return Response({
+            "reviews": data,
+            "hasMore": self.page.has_next()
+        })

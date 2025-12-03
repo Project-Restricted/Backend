@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+from core.views import auth_test
 
 urlpatterns = [
     path('', RedirectView.as_view(url='/api/v1/movies/')),  
@@ -12,6 +13,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('admin/', admin.site.urls),
+    path('auth-test/', auth_test),
 ]
 
 if settings.DEBUG:

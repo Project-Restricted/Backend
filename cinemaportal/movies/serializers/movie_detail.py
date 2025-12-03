@@ -8,7 +8,6 @@ from users.models import User
 # --- Вспомогательный сериализатор для юзера в отзывах ---
 class UserBriefSerializer(serializers.ModelSerializer):
     avatarUrl = serializers.SerializerMethodField()
-    username = serializers.CharField(source='username')
 
     class Meta:
         model = User
@@ -16,33 +15,54 @@ class UserBriefSerializer(serializers.ModelSerializer):
 
     def get_avatarUrl(self, obj):
         request = self.context.get('request')
-        if obj.avatar:
-            return request.build_absolute_uri(obj.avatar.url)
+        if getattr(obj, 'avatar_url', None):
+            return obj.avatar_url
         return None
 
 
-# --- Сериализатор отзыва ---
+# --- Сериализатор отзыва (чтение) ---
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserBriefSerializer(read_only=True)
-    replyOn = serializers.SerializerMethodField()
     createdAt = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
+    likedByCurrentUser = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             'id',
-            'replyOn',
             'text',
-            'likes',
             'createdAt',
-            'user'
+            'user',
+            'likes',
+            'likedByCurrentUser',
         ]
 
-    def get_replyOn(self, obj):
-        return obj.reply_on_id  # int или None
-
     def get_createdAt(self, obj):
-        return int(obj.created_at.timestamp())
+        return int(obj.creation_date.timestamp())
+
+    def get_likes(self, obj):
+        # likes property on model returns liked_by.count()
+        return getattr(obj, 'likes', 0)
+
+    def get_likedByCurrentUser(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if not user or not user.is_authenticated:
+            return False
+        return obj.liked_by.filter(pk=user.pk).exists()
+
+
+# --- Сериализатор отзыва (создание) ---
+class CreateReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ['movie', 'text']
+
+    def create(self, validated_data):
+        # автоматически устанавливаем текущего пользователя
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
 
 
 # --- Главный сериализатор фильма ---
@@ -56,7 +76,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
     director = serializers.SerializerMethodField()
 
     duration = serializers.SerializerMethodField()       # минуты
-    reviews = ReviewSerializer(many=True, read_only=True)
+    reviews = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
@@ -120,3 +140,17 @@ class MovieDetailSerializer(serializers.ModelSerializer):
         if not obj.duration:
             return None
         return int(obj.duration.total_seconds() // 60)
+
+    def get_reviews(self, obj):
+        request = self.context.get('request')
+        # allow caller to control how many top-level reviews to include
+        default_limit = 5
+        limit = default_limit
+        if request:
+            try:
+                limit = int(request.query_params.get('reviews_limit', default_limit))
+            except (TypeError, ValueError):
+                limit = default_limit
+
+        top_level = obj.posts.filter(deleted=False).order_by('-creation_date')[:limit]
+        return ReviewSerializer(top_level, many=True, context=self.context).data
