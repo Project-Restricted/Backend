@@ -117,7 +117,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
 
     # --- tags as list of names ---
     def get_tags(self, obj):
-        return [t.name for t in obj.tags.all()]
+        return [t.tag for t in obj.tags.all()]
 
     # --- actors formatted красиво ---
     def get_actors(self, obj):
