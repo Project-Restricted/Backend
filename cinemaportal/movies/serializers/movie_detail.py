@@ -109,12 +109,7 @@ class MovieDetailSerializer(serializers.ModelSerializer):
 
     # --- video absolute URL ---
     def get_videoUrl(self, obj):
-        if not obj.video_url:
-            return None
-        request = self.context.get('request')
-
-        if request:
-            return request.build_absolute_uri(obj.poster_url)
+        return obj.video_url
 
     # --- genres as list of names ---
     def get_genres(self, obj):
