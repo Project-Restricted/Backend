@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+
 from django.contrib import admin
 from movies.models.movie import Movie
 from movies.models.movie import MovieSource

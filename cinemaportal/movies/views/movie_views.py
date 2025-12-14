@@ -1,9 +1,15 @@
-# movies/views/movie_views.py
 from django.db.models import Q
 from rest_framework import generics
 from movies.models.movie import Movie
 from movies.serializers.movie_serializer import MovieListSerializer
 from movies.pagination import InfiniteScrollPagination
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.views import APIView
+from movies.serializers.movie_detail import CreateMovieSerializer, MovieDetailSerializer
+from movies.serializers.movie_detail import UpdateMovieSerializer
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
 class MovieListView(generics.ListAPIView):
     """
@@ -79,3 +85,39 @@ class MovieListView(generics.ListAPIView):
                 qs = qs.order_by(ordering)
 
         return qs
+
+
+class CreateMovieView(generics.CreateAPIView):
+    """Allow moderators to create movies with poster upload, actors, directors."""
+    serializer_class = CreateMovieSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if getattr(user, 'role', None) != 'moderator':
+            return Response({'success': False, 'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        movie = serializer.save()
+        # return full movie detail
+        return Response({'success': True, 'movie': MovieDetailSerializer(movie, context={'request': request}).data}, status=status.HTTP_201_CREATED)
+
+
+class UpdateMovieView(APIView):
+    """Allow moderators to partially update an existing movie."""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        user = request.user
+        if getattr(user, 'role', None) != 'moderator':
+            return Response({'success': False, 'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        from movies.models.movie import Movie
+        movie = get_object_or_404(Movie, pk=pk)
+
+        serializer = UpdateMovieSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        movie = serializer.update(movie, serializer.validated_data)
+
+        return Response({'success': True, 'movie': MovieDetailSerializer(movie, context={'request': request}).data}, status=status.HTTP_200_OK)

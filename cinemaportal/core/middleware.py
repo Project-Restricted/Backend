@@ -6,7 +6,7 @@ class CustomCorsMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # If it's an OPTIONS preflight, return an empty 200 response with CORS headers
+        # For OPTIONS preflight return empty 200 with CORS headers
         if request.method == 'OPTIONS':
             resp = HttpResponse()
             origin = request.headers.get('Origin')

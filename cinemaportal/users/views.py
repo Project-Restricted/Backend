@@ -20,7 +20,6 @@ class RegisterView(APIView):
 
     def post(self, request):
         data = request.data
-        # Простая валидация паролей
         password = data.get('password')
         password_confirm = data.get('passwordConfirm') or data.get('password_confirm')
         if not password or password != password_confirm:
@@ -33,14 +32,12 @@ class RegisterView(APIView):
 
         try:
             user = User.objects.create_user(username=username, email=email, password=password)
-            # Попробуем записать first/last name если они пришли
             name = data.get('name')
             lastName = data.get('lastName')
             if name:
                 user.first_name = name
             if lastName:
                 user.last_name = lastName
-            # дополнительные поля (middleName, birthDate) пока не сохраняем — нет полей в модели
             user.save()
 
             serializer = PublicUserSerializer(user)
@@ -141,3 +138,12 @@ class ModeratorRequestView(APIView):
         # Create ModeratorRequest object
         mr = ModeratorRequest.objects.create(user=request.user, message=serializer.validated_data.get('message', ''), created_at=timezone.now())
         return Response({'success': True, 'request': {'id': mr.id, 'status': mr.status, 'created_at': mr.created_at}})
+
+
+class AccountView(APIView):
+    """Return the authenticated user's public account data."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = PublicUserSerializer(request.user, context={'request': request})
+        return Response({'success': True, 'user': serializer.data})

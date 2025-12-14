@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-
 from movies.models import Post
 from movies.serializers.movie_detail import ReviewSerializer, CreateReviewSerializer
 from movies.pagination import ReviewsPagination
@@ -16,13 +15,16 @@ class CreateReviewView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        # вернуть полный объект отзыва (ReviewSerializer), а не CreateReviewSerializer
-        post = Post.objects.get(pk=response.data['id'])
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        post = serializer.save(author=request.user)
+
         return Response(
             ReviewSerializer(post, context={'request': request}).data,
             status=status.HTTP_201_CREATED
         )
+
 
 
 class PostLikeToggleView(APIView):
