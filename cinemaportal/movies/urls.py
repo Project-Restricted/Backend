@@ -4,6 +4,7 @@ from .views.movie_detail import MovieDetailView
 from .views.movie_detail import MovieReviewsView
 from .views.post_views import PostLikeToggleView, CreateReviewView
 from .views.movie_views import CreateMovieView, UpdateMovieView
+from .views.genre_views import GenreListView
 
 urlpatterns = [
     path('', MovieListView.as_view(), name='movie-list'),
@@ -15,4 +16,6 @@ urlpatterns = [
     path('posts/create/', CreateReviewView.as_view(), name='create-review'),
     # like/unlike post
     path('posts/<int:pk>/like/', PostLikeToggleView.as_view(), name='post-like'),
+    # list of genres for frontend filters
+    path('genres/', GenreListView.as_view(), name='genre-list'),
 ]
