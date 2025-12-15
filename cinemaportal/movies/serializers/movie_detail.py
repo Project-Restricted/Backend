@@ -78,6 +78,9 @@ class MovieDetailSerializer(serializers.ModelSerializer):
     duration = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
 
+    # Present country as a name string (frontend expects a string), and rating as numeric
+    country = serializers.SerializerMethodField()
+    rating = serializers.FloatField()
     class Meta:
         model = Movie
         fields = [
@@ -96,6 +99,11 @@ class MovieDetailSerializer(serializers.ModelSerializer):
             'videoUrl',
             'reviews'
         ]
+
+    def get_country(self, obj):
+        if obj.country:
+            return obj.country.name
+        return None
 
 
     def get_posterUrl(self, obj):

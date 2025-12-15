@@ -6,3 +6,4 @@ from .actor import Actor, MovieActor
 from .director import Director, MovieDirector
 from .post import Post
 from .genre import Genre, MovieGenre 
+from .movie_rating import MovieRating

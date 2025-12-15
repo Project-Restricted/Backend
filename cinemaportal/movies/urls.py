@@ -5,12 +5,15 @@ from .views.movie_detail import MovieReviewsView
 from .views.post_views import PostLikeToggleView, CreateReviewView
 from .views.movie_views import CreateMovieView, UpdateMovieView
 from .views.genre_views import GenreListView
+from .views.rating_views import RateMovieView
 
 urlpatterns = [
     path('', MovieListView.as_view(), name='movie-list'),
     path('create/', CreateMovieView.as_view(), name='movie-create'),
     path('<int:pk>/edit/', UpdateMovieView.as_view(), name='movie-edit'),
     path('<int:pk>/', MovieDetailView.as_view(), name='movie-detail'),
+    # rating endpoint
+    path('<int:pk>/rate/', RateMovieView.as_view(), name='movie-rate'),
     path('<int:pk>/reviews/', MovieReviewsView.as_view(), name='movie-reviews'),
     # create review
     path('posts/create/', CreateReviewView.as_view(), name='create-review'),
